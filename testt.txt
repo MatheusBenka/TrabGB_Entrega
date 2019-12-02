@@ -1,9 +1,0 @@
-programa teste ;
-var x : inteiro;
-var y : booleano;
-inicio
-  x := 3 + 1336;
-  y := verdadeiro;
-  z := 898;
-  escreva(x);
-fim.

@@ -1,0 +1,1 @@
+Tivemos dificuldades em implementar a geração de código. Tentamos utilizar várias ferramentas fora do JavaCC porém nenhuma delas funcionou realmente.

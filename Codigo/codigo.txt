@@ -1,0 +1,10 @@
+programa asdesas;
+var x: booleano;
+var z: inteiro;
+inicio
+x := verdadeio;
+y := 4;
+z := 5 + 3 - falso;
+escreva(x);
+escreva(z);
+fim.

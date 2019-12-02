@@ -1,23 +1,23 @@
-PARSER_BEGIN(comp)
+PARSER_BEGIN(analisa_LPD)
 import java.io.*;
-class comp
+class analisa_LPD
 {
 	public static void main( String[] args )throws ParseException, Exception
 	{
 		try
 		{
-     		comp analizador = new comp( System.in ) ;
+     		analisa_LPD analizador = new analisa_LPD( System.in ) ;
 			analizador.Programa();
-			System.out.println("\tFim.");
+			System.out.println("Analisado.");
 		}
 		catch(ParseException e)
 		{
 			System.out.println(e.getMessage());
-			System.out.println("\tError.");
+			System.out.println("Erro= ");
 		}
 	}
 }
-PARSER_END(comp)
+PARSER_END(analisa_LPD)
 
 TOKEN :
 {
@@ -39,8 +39,8 @@ TOKEN:
 }
 TOKEN:
 {
-      <LPAREN: "(" >
-	| <RPAREN: ")" >
+      <FECHAPARENTESES: ")" >
+	| <ABREPARENTESES: "(" >
 	| <PONTO_VIRGULA: ";" >
 	| <VIRGULA: "," >
 	| <PONTO: "." >
@@ -51,10 +51,10 @@ TOKEN:
 	  <INTEIRO:"inteiro">
 	| <BOOLEANO:"booleano">
 	| <NUMERO : (["0"-"9"])+>
+	| <VERDADEIRO :"verdadeiro">
+	| <FALSO :"falso">
 	| <IDENTIFICADOR : ["a"-"z","A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*>
-	| <TRUE :"verdadeiro">
-	| <FALSE :"falso">
-	| <DOIS_PONTO : ":">
+	| <DOIS_PONTOS : ":">
 }
 
 SKIP :
@@ -71,31 +71,33 @@ void Programa():
 void Bloco():
 {}
 {
-	Declaracoes()Principal()
+	Declaracoes()Programa_Principal()
 }
 
 void Declaracoes():
 {}
 {
-	((DeclaraUmaVariavel())*<PONTO_VIRGULA>)*
+	((Declara_Variavel())*<PONTO_VIRGULA>)*
 }
 
 
-void DeclaraUmaVariavel():
+void Declara_Variavel():
 {
 	int td;
-	Token var;	
+	Token v1 = new Token();
+	Token v2 = new Token();
+	Token var = new Token();
 }
 {
 	<VAR>
 	var = <IDENTIFICADOR>
-	<DOIS_PONTO>
-	(TiposDDados())
+	<DOIS_PONTOS>
+	(Tipo_Dados())
 	{
 		td = token.kind;
-		TokenAtribuicoes.InserirSimbolo(var, td);
+		tabela_simb.InserirSimbolo(var, td);
 	}
-	[VariaveisAtribuicao(var)]
+	[Variaveis_Atribuicao(var)]
 }
 
 void Tipo():
@@ -104,9 +106,9 @@ void Tipo():
 	<INTEIRO> | <BOOLEANO>
 }
 
-void Principal():
+void Programa_Principal():
 {
-	TokenAtribuicoes.SetTables();
+	tabela_simb.SetTables();
 	
 }
 {
@@ -114,36 +116,36 @@ void Principal():
 }
 
 
-void VariaveisLocais():
+void Variaveis_Locais():
 {
 	int td;
 	Token var;
 }
 {
 (
-	(TiposDDados())
+	(Tipo_Dados())
 	{
 		td = token.kind;
 	}
 	var = <IDENTIFICADOR>
 	{
-		TokenAtribuicoes.InserirSimbolo(var, td);
+		tabela_simb.InserirSimbolo(var, td);
 	}
-	[VariaveisAtribuicao(var)]
+	[Variaveis_Atribuicao(var)]
 	(
 		<VIRGULA>
 		var = <IDENTIFICADOR>
 		{
-			TokenAtribuicoes.InserirSimbolo(var, td);
+			tabela_simb.InserirSimbolo(var, td);
 		}
-		[VariaveisAtribuicao(var)]
+		[Variaveis_Atribuicao(var)]
 	)*
 	<PONTO_VIRGULA>
 )
 	(VS())
 }
 
-void VariaveisAtribuicao(Token v1):
+void Variaveis_Atribuicao(Token v1):
 {
 	Token v2;
 	Token v3;
@@ -152,10 +154,10 @@ void VariaveisAtribuicao(Token v1):
 }
 {
 	<ATRIBUICAO>
-	(TiposAtribuicao())
+	(Tipos_Atribuicao())
 	  {
 		v2 = token;
-		res = TokenAtribuicoes.checkAtrib(v1, v2);
+		res = tabela_simb.checkAtrib(v1, v2, "c");
 
 		if(res != " ")
 		{
@@ -163,11 +165,11 @@ void VariaveisAtribuicao(Token v1):
 			imp = true;
 		}
 	  }
-	  (OpMath()
-	  TiposAtribuicao()
+	  (Operacao()
+	  Tipos_Atribuicao()
 	  {
 		v3 = token;
-		res = TokenAtribuicoes.checkAtrib(v1, v3);
+		res = tabela_simb.checkAtrib(v1, v3, "d");
 
 		if(res != " " && !imp)
 		{
@@ -179,20 +181,20 @@ void VariaveisAtribuicao(Token v1):
 void VS():
 {}
 {
-	LOOKAHEAD(3)VariaveisLocais() | Sentencas()
+	LOOKAHEAD(3)Variaveis_Locais() | Sentencas()
 }
 
 void Sentencas():
 {}
 {
 	(
-	  VariaveisLocais()
+	  Variaveis_Locais()
 	| LOOKAHEAD(2)Atribuicao()<PONTO_VIRGULA>
 	| Escreva()
 	)*
 }
 
-int OpMath():
+int Operacao():
 {}
 {
 	  (<MAIS> {return 1;})
@@ -204,7 +206,7 @@ int OpMath():
 	{return 0;}
 }
 
-void TiposDDados():
+void Tipo_Dados():
 {}
 {
 	 <INTEIRO>
@@ -223,42 +225,60 @@ void Atribuicao():
 {
   v1 = <IDENTIFICADOR>
   (<ATRIBUICAO>
-  (TiposAtribuicao())
+  (Tipos_Atribuicao())
   {
     v2 = token;
-	res = TokenAtribuicoes.checkAtrib(v1, v2);
-
+	res = tabela_simb.checkAtrib(v1, v2, "a");
+	
 	if(res != " ")
 	{		
-		System.out.println(res);
 		imp = true;
+		System.out.println("\n" + res);
 	}
   }	
-  (LOOKAHEAD(2)OpMath()
-  TiposAtribuicao()
+  (LOOKAHEAD(2)Operacao()
+  Tipos_Atribuicao()
   {
     v3 = token;
-	res = TokenAtribuicoes.checkAtrib(v1, v3);
+	res = tabela_simb.checkAtrib(v1, v3, "b");
 
 	if(res != " " && !imp)
 	{
-		System.out.println("OpMath\n" + res);
+		System.out.println("Operacao\n" + res);
 	}
   })*)
 
 }
-void TiposAtribuicao():
+void Tipos_Atribuicao():
 {}
 {	  
-	<NUMERO>
-	| <TRUE>
-	| <FALSE>
+	 <VERDADEIRO>
+	| <FALSO>
+	| <NUMERO>
 	|<IDENTIFICADOR>
 }
 
 void Escreva():
-{}
 {
-    <ESCREVA><LPAREN> (<IDENTIFICADOR>| <NUMERO>) <RPAREN> <PONTO_VIRGULA>
+	Token v1 = new Token();
+	Token v2 = new Token();
+	String res;
+}
+{
+
+    <ESCREVA>
+	<ABREPARENTESES>
+	( v1 = <IDENTIFICADOR> | v2 = <NUMERO>)
+	{
+		if(v1.image != null){
+		res = tabela_simb.checkExist(v1);
+
+			if(res != " ")
+			{
+				System.out.println(res);
+			}
+		}
+	}
+	<FECHAPARENTESES><PONTO_VIRGULA>
 }
 
