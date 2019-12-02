@@ -1,4 +1,4 @@
-#Compilador JAVACC para LPD
+# Compilador JAVACC para LPD
 
 Nosso trabalho foi feito utilizando a abordagem da ferramenta JavaCC, foi feita a tabela de símbolos, análise sintática, análise semântica e o tratamento de erros. Os principais arquivos são analisa_LPD.jj, tabela_simb.java e codigo.txt.
 
@@ -6,7 +6,7 @@ O código teste utilizado em codigo.txt está com erros propositais para testar 
 
 O analisador foi compilado e testado utilizando o cmd. 
 
-##Para executa-lo:
+## Para executa-lo:
 
 é preciso abrir o cmd no local dos arquivos principais e executar o comando: 
 
